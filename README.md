@@ -1,5 +1,6 @@
 # ParkALot
 This is the project I've come up with for the LTA x ITSS hackathon 2025. All the code needed will be stored here for anyone interested! 
+The full code is located at master branch , view the code there!
 
 ### Outline of the project:
 An all-in-one app for road commuters to use. Leveraging third-party and crowdsourced information, our app prototype uses multiple API from the LTA DataMall and aims to make travelling with a car more convenient for everyone. The data from our prototype constantly refreshes for the latest information as well. The features include:
