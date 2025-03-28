@@ -3,10 +3,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';  // Add this import to handle JSON decoding
-import 'dart:async';   // Add this import for Timer
-
-import 'save_parking_screen.dart';  // Import the new page
+import 'dart:convert';  
+import 'dart:async';   
+import 'save_parking_screen.dart';  
 
 void main() {
   runApp(const MyApp());
@@ -32,25 +31,25 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   LatLng? _currentPosition;  // Current position
-  List<List<dynamic>> _locations = [];  // List of locations from API
-  final double _radiusInMeters = 200.0;  // Radius in meters
-  List<List<dynamic>> _trafficData = []; // List to store traffic data
-  List<List<dynamic>> _trafficIncidents = []; // List to store traffic incidents
-  late Timer _timer;  // Timer for automatic refresh
+  List<List<dynamic>> _locations = [];  
+  final double _radiusInMeters = 200.0;  
+  List<List<dynamic>> _trafficData = []; 
+  List<List<dynamic>> _trafficIncidents = []; 
+  late Timer _timer;  
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();  // Get current location when the app starts
-    _fetchParkingLotsData();  // Initial fetch of parking lot data
-    _fetchTrafficSpeedData();  // Initial fetch of traffic speed data
-    _fetchTrafficIncidentData();  // Initial fetch of traffic incidents data
-    _startAutoRefresh();  // Start auto-refresh every 30 seconds
+    _getCurrentLocation();  
+    _fetchParkingLotsData();  
+    _fetchTrafficSpeedData();  
+    _fetchTrafficIncidentData();  
+    _startAutoRefresh();  
   }
 
   @override
   void dispose() {
-    _timer.cancel();  // Cancel the timer when the screen is disposed
+    _timer.cancel();  
     super.dispose();
   }
 
@@ -81,7 +80,7 @@ class _MapScreenState extends State<MapScreen> {
     // Update the current position
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
-      _mapController.move(_currentPosition!, 15.0); // Move the camera to the current location
+      _mapController.move(_currentPosition!, 15.0); 
     });
   }
 
@@ -90,15 +89,15 @@ class _MapScreenState extends State<MapScreen> {
     final response = await http.get(Uri.parse('http://127.0.0.1:5000/get_data')); // Replace with your API endpoint
 
     if (response.statusCode == 200) {
-      // Parse the JSON response
+ 
       List<dynamic> data = json.decode(response.body);
 
-      // Extract and store locations in the _locations list
+
       setState(() {
         _locations = List<List<dynamic>>.from(data.map((lot) => lot));
       });
     } else {
-      // Handle error if API request fails
+
       throw Exception('Failed to load parking lot data');
     }
   }
@@ -108,22 +107,22 @@ class _MapScreenState extends State<MapScreen> {
     final response = await http.get(Uri.parse('http://127.0.0.1:5000/get_traffic_speed_data')); // Replace with your API endpoint
 
     if (response.statusCode == 200) {
-      // Parse the JSON response
+
       List<dynamic> data = json.decode(response.body);
 
-      // Extract and store traffic data in the _trafficData list
+
       setState(() {
         _trafficData = List<List<dynamic>>.from(data.map((item) => item));
       });
     } else {
-      // Handle error if API request fails
+
       throw Exception('Failed to load traffic speed data');
     }
   }
 
   // Fetch traffic incident data from the API
   Future<void> _fetchTrafficIncidentData() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:5000/traffic_incidents')); // Replace with your API endpoint
+    final response = await http.get(Uri.parse('http://127.0.0.1:5000/traffic_incidents')); 
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -168,7 +167,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // Function to build traffic speed polylines with thicker lines
   List<Polyline> _buildTrafficSpeedPolylines() {
     if (_trafficData.isEmpty) {
       return [];
@@ -176,23 +174,20 @@ class _MapScreenState extends State<MapScreen> {
 
     return _trafficData
         .map((data) {
-          var startCoordinates = data[1].split(' '); // Start coordinates (lon, lat)
-          var endCoordinates = data[2].split(' '); // End coordinates (lon, lat)
-          int speedRange = data[0]; // Speed range
+          var startCoordinates = data[1].split(' '); 
+          var endCoordinates = data[2].split(' '); 
+          int speedRange = data[0]; 
 
-          // Parse the coordinates as doubles
           double startLon = double.parse(startCoordinates[0]);
           double startLat = double.parse(startCoordinates[1]);
           double endLon = double.parse(endCoordinates[0]);
           double endLat = double.parse(endCoordinates[1]);
 
-          // Get the color based on speed range
           Color color = _getSpeedColor(speedRange);
 
-          // Return polyline representing the traffic speed segment
           return Polyline(
             points: [LatLng(startLat, startLon), LatLng(endLat, endLon)],
-            strokeWidth: 8.0,  // Increased line thickness
+            strokeWidth: 8.0,  
             color: color,
           );
         })
@@ -203,23 +198,20 @@ class _MapScreenState extends State<MapScreen> {
   List<Marker> _buildMarkers() {
     return _locations
         .map((lot) {
-          var coordinates = lot[3].split(' '); // Getting the coordinates from the API data
+          var coordinates = lot[3].split(' '); 
 
-          // Check if coordinates are 'N/A N/A' and skip invalid ones
           if (coordinates.length < 2 || coordinates[0] == 'N/A' || coordinates[1] == 'N/A') {
-            return null;  // Skip the marker if coordinates are 'N/A N/A'
+            return null;  
           }
 
-          // Try to parse the coordinates as double, catch any errors
           try {
             double lat = double.parse(coordinates[0]);
             double lon = double.parse(coordinates[1]);
 
-            // Return Marker widget directly without using 'builder'
             return Marker(
               point: LatLng(lat, lon),
-              width: 150,  // Adjust width and height to fit the content
-              height: 100,  // Adjust height as needed
+              width: 150,  
+              height: 100,  
               child: Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -232,7 +224,7 @@ class _MapScreenState extends State<MapScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${lot[0]}',  // Development name (e.g., "HDB")
+                      '${lot[0]}',  
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black),
                     ),
                     Text(
@@ -248,12 +240,12 @@ class _MapScreenState extends State<MapScreen> {
               ),
             );
           } catch (e) {
-            return null;  // Skip the marker if parsing fails
+            return null;  
           }
         })
-        .where((marker) => marker != null)  // Remove null markers from the list
+        .where((marker) => marker != null)  
         .toList()
-        .cast<Marker>();  // Ensure the list is cast to List<Marker>
+        .cast<Marker>();  
   }
 
   // Function to build markers for traffic incidents
@@ -268,10 +260,10 @@ class _MapScreenState extends State<MapScreen> {
 
           return Marker(
             point: LatLng(lat, lon),
-            width: 150, // Increased width to make the box bigger
-            height: 150, // Increased height to make the box bigger
+            width: 150, 
+            height: 150, 
             child: Container(
-              padding: EdgeInsets.all(12), // Added more padding for spacing
+              padding: EdgeInsets.all(12), 
               decoration: BoxDecoration(
                 color: Colors.redAccent,
                 borderRadius: BorderRadius.circular(12),
@@ -284,16 +276,16 @@ class _MapScreenState extends State<MapScreen> {
                   Text(
                     description,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
-                    overflow: TextOverflow.ellipsis, // Truncate text if it's too long
+                    overflow: TextOverflow.ellipsis, 
                   ),
-                  SizedBox(height: 8), // Increased space between description and details
+                  SizedBox(height: 8), 
                   Expanded(
-                    child: SingleChildScrollView(  // Allow scrolling for longer details text
+                    child: SingleChildScrollView(  
                       child: Text(
                         details,
                         style: TextStyle(fontSize: 12, color: Colors.white),
-                        maxLines: 3, // Limit to 3 lines of text
-                        overflow: TextOverflow.ellipsis, // Show ellipsis if text is too long
+                        maxLines: 3, 
+                        overflow: TextOverflow.ellipsis, 
                       ),
                     ),
                   ),
@@ -320,7 +312,6 @@ class _MapScreenState extends State<MapScreen> {
           IconButton(
             icon: Icon(Icons.add_location_alt),
             onPressed: () {
-              // Navigate to the new Save Parking screen
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SaveParkingScreen(currentPosition: _currentPosition)),
@@ -332,7 +323,7 @@ class _MapScreenState extends State<MapScreen> {
       body: FlutterMap(
         mapController: _mapController,
         options: MapOptions(
-          initialCenter: _currentPosition ?? LatLng(51.5074, -0.1278), // Default to London's coordinates or current location
+          initialCenter: _currentPosition ?? LatLng(51.5074, -0.1278), 
           initialZoom: 12.0,
         ),
         children: [
@@ -341,32 +332,30 @@ class _MapScreenState extends State<MapScreen> {
             subdomains: ['a', 'b', 'c'],
           ),
           MarkerLayer(
-            markers: _buildMarkers() + _buildTrafficIncidentMarkers(),  // Combine both parking and traffic markers
+            markers: _buildMarkers() + _buildTrafficIncidentMarkers(),  
           ),
           PolylineLayer(
-            polylines: _buildTrafficSpeedPolylines(), // Add traffic speed polylines
+            polylines: _buildTrafficSpeedPolylines(), 
           ),
           if (_currentPosition != null) ...[
-            // Circle around user's location with 200m radius (red circle)
             CircleLayer(
               circles: [
                 CircleMarker(
                   point: _currentPosition!,
                   radius: _radiusInMeters,
-                  color: Colors.red.withOpacity(0.3), // Translucent red circle
-                  borderColor: Colors.red,  // Red border
+                  color: Colors.red.withOpacity(0.3), 
+                  borderColor: Colors.red,  
                   borderStrokeWidth: 2,
                 ),
               ],
             ),
-            // Marker for the user location (black car icon)
             MarkerLayer(
               markers: [
                 Marker(
                   point: _currentPosition!,
                   width: 50,
                   height: 50,
-                  child: Icon(Icons.directions_car, color: Colors.black, size: 40), // Black car icon
+                  child: Icon(Icons.directions_car, color: Colors.black, size: 40), 
                 ),
               ],
             ),
@@ -376,7 +365,7 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_currentPosition != null) {
-            _mapController.move(_currentPosition!, 15.0); // Move to current location
+            _mapController.move(_currentPosition!, 15.0);
           }
         },
         child: Icon(Icons.my_location),

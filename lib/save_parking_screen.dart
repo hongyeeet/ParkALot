@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:latlong2/latlong.dart';  // For handling LatLng
+import 'package:latlong2/latlong.dart';  
 
 class SaveParkingScreen extends StatefulWidget {
-  final LatLng? currentPosition;  // Add this parameter to accept current position
+  final LatLng? currentPosition;  
 
-  // Constructor to accept currentPosition as an optional parameter
   SaveParkingScreen({Key? key, this.currentPosition}) : super(key: key);
 
   @override
@@ -41,7 +40,7 @@ class _SaveParkingScreenState extends State<SaveParkingScreen> {
         _savedParkingLots.add({
           'name': lotName,
           'image': _isPhotoTaken ? _image : null,
-          'location': widget.currentPosition,  // Save current location with the parking lot
+          'location': widget.currentPosition,  
         });
       });
 
@@ -84,7 +83,6 @@ class _SaveParkingScreenState extends State<SaveParkingScreen> {
             ),
             SizedBox(height: 20),
 
-            // Show selected image if available
             _isPhotoTaken
                 ? Column(
                     children: [
@@ -94,7 +92,6 @@ class _SaveParkingScreenState extends State<SaveParkingScreen> {
                   )
                 : Container(),
 
-            // Buttons for taking photo and selecting from gallery
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -118,7 +115,6 @@ class _SaveParkingScreenState extends State<SaveParkingScreen> {
             ),
             SizedBox(height: 20),
 
-            // Show saved parking lot info
             _savedParkingLots.isNotEmpty
                 ? Column(
                     children: [
